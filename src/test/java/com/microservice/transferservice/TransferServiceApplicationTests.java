@@ -1,4 +1,4 @@
-package com.microservice.transferService;
+package com.microservice.transferservice;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

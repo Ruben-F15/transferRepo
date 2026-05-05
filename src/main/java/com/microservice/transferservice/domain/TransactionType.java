@@ -1,4 +1,4 @@
-package com.microservice.transferService.domain;
+package com.microservice.transferservice.domain;
 
 public enum TransactionType {
     CREDIT, DEBIT, ADJUSTMENT

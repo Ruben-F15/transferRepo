@@ -1,4 +1,4 @@
-package com.microservice.transferService.service;
+package com.microservice.transferservice.service;
 
 import org.springframework.stereotype.Service;
 

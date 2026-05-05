@@ -1,4 +1,4 @@
-package com.microservice.transferService.domain;
+package com.microservice.transferservice.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

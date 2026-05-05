@@ -1,6 +1,6 @@
-package com.microservice.transferService.repository;
+package com.microservice.transferservice.repository;
 
-import com.microservice.transferService.domain.TransactionDocument;
+import com.microservice.transferservice.domain.TransactionDocument;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.math.BigDecimal;

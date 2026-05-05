@@ -1,6 +1,6 @@
-package com.microservice.transferService.service;
+package com.microservice.transferservice.service;
 
-import com.microservice.transferService.repository.TransactionRepository;
+import com.microservice.transferservice.repository.TransactionRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
