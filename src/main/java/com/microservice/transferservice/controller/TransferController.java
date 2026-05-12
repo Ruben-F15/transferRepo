@@ -1,7 +1,6 @@
 package com.microservice.transferservice.controller;
 
-import com.microservice.transferservice.dto.TransferRequestEventDTO;
-import com.microservice.transferservice.kafka.KafkaProducerService;
+import com.microservice.transferservice.kafka.event.TransferRequestEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,9 +13,8 @@ import java.math.BigDecimal;
 @RestController
 @RequestMapping("/api/v1/transacciones")
 @RequiredArgsConstructor
-public class TransactionController {
+public class TransferController {
 
-    private final KafkaProducerService producerService;
 
   /**
      * Endpoint público que recibe la solicitud de transferencia.
@@ -25,22 +23,16 @@ public class TransactionController {
      * @param request Contiene [sourceId, destinationId, amount].
      * @return 202 Accepted, indicando que la orden ya fue aceptada y se procesará.
      */
-    @PostMapping("/transferir")
-    public ResponseEntity<String> iniciarTransferencia(@RequestBody TransferRequestEventDTO request) {
+    @PostMapping("/transfer")
+    public ResponseEntity<String> iniciarTransferencia(@RequestBody TransferRequestEvent request) {
         // 1. Validación mínima de entrada.
         if (request == null || request.amount() == null || request.amount().compareTo(BigDecimal.ZERO) <= 0) {
             return ResponseEntity.badRequest().body("Monto inválido.");
         }
 
-        // 2. **ACCIÓN CRÍTICA:** Publicar el evento inicial de forma asíncrona.
-        producerService.publishTransferRequest(
-                request.sourceAccountId(),
-                request.destinationAccountId(),
-                request.amount()
-        );
 
         // 3. Respuesta Inmediata (Asíncrono).
-        // No esperamos el resultado. Simplemente confirmamos que la orden fue recibida y está en cola de procesamiento.
+        // No esperamos el resultado. Simplemente, confirmamos que la orden fue recibida y está en cola de procesamiento.
         return ResponseEntity.accepted().body("Transferencia solicitada. Estaremos notificando el resultado en breve.");
     }
 

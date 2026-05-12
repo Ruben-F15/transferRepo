@@ -3,20 +3,14 @@ spring:
     name: transferservice
 
   # Configuración de la base de datos MySQL para AccountService
-  datasource:
-    url: jdbc:mysql://${DB_HOST}:3306/${DB_NAME}?useSSL=false
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
 
-  # Configuración JPA/Hibernate
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: true
+  mongodb:
+    uri: ${SPRING_MONGODB_URI}
+
 
   kafka:
     #    bootstrap-servers: localhost:9092  #para local
-    bootstrap-servers: kafka:29092   # para docker
+    bootstrap-servers: kafka:29092
     consumer:
       group-id: transferGroup
       auto-offset-reset: earliest
@@ -24,9 +18,15 @@ spring:
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
         spring.json.trusted.packages: "*"
+#        spring.json.value.default.type: com.microservice.accountService.kafka.event.UserCreatedEvent
+        spring.json.use.type.headers: false
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+
+jwt:
+  secret: ${SECRET_KEY}
 
 logging:
   pattern: # PARA EL CORRELATIONAL ID - LO MOSTRAMOS EN LOG
