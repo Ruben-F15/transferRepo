@@ -29,7 +29,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain) throws ServletException, IOException {
+        // evita que salte actuator cada 30 segundos por el healthcheck en logs.
+        if (request.getRequestURI().startsWith("/actuator")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         final String authorizationHeader = request.getHeader("Authorization");
+        System.out.println("::::::::::: AuthorizationHeader: " + authorizationHeader);
 
         if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
@@ -37,15 +44,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         String jwt = authorizationHeader.substring(7);
-
+        System.out.println("::::::::::: jwt: " + jwt);
         if(jwtService.isTokenValid(jwt)) {
             Claims claims = jwtService.extractAllClaims(jwt);
 
             String userId = jwtService.extractUserId(jwt);
 
             Object rolesClaim = claims.get("role");
-
+            System.out.println("::::::::::: user id: " + userId);
             List<String> roles;
+
 
             if(rolesClaim instanceof List<?> rawList) {
                 roles = rawList.stream()
@@ -54,6 +62,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             } else  {
                 roles = List.of();
             }
+            System.out.println("::::::::::: roles: " + roles);
+            roles.forEach(System.out::println);
             Collection<? extends GrantedAuthority> authorities =
                     roles.stream()
                             .map(SimpleGrantedAuthority::new)

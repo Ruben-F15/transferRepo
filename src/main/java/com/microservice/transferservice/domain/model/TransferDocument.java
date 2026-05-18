@@ -5,6 +5,7 @@ import com.microservice.transferservice.domain.enums.TransferType;
 
 import lombok.*;
 
+import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -19,20 +20,20 @@ import java.time.Instant;
 public class TransferDocument {
 
     @Id
-    private String id; // UUID
+    private ObjectId id;
 
     // Claves foráneas: usamos String para mantener la interoperabilidad con Mongo
-    private String sourceAccountId; //(Foreign Key).
+    private String sourceUserId; //(Foreign Key).
 
-    private String destinationAccountId; //(Foreign Key).
+    private String destinationUserId; //(Foreign Key).
 
     private BigDecimal amount;
 
     private String currency; //Por ahora siempre EUR
 
-    private TransferType transferType;
+    private TransferType transferType; // (Enum: CREDIT, DEBIT, ADJUSTMENT, INTERNAL_TRANSFER)
 
-    private TransferStatus status; //(Enum: PENDIENTE, COMPLETED, FAILED).
+    private TransferStatus status; //(Enum: PENDING, COMPLETED, FAILED, ROLLED_BACK)
 
     // Timestamps
     private Instant createdAt;
@@ -40,4 +41,6 @@ public class TransferDocument {
     private Instant statusUpdatedAt;
 
     private String failureReason;
+
+    private String transactionId; // UUID
 }

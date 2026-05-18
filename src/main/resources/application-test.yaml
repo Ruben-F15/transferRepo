@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: transferservice
+
+  # mongodb:
+  #  uri: mongodb://localhost:27018/test?replicaSet=rs0
+
+
+  data:
+    mongodb:
+      auto-index-creation: true
+
+  kafka:
+    enabled: false
+
+server:
+  port: 8080
+
+
+jwt:
+  secret: "my-super-secret-key-for-testing-which-is-long-enough-123456"

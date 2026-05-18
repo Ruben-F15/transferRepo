@@ -18,11 +18,33 @@ spring:
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
         spring.json.trusted.packages: "*"
-#        spring.json.value.default.type: com.microservice.accountService.kafka.event.UserCreatedEvent
+        spring.json.value.default.type: com.microservice.transferservice.kafka.event.TransferRequestedEvent
         spring.json.use.type.headers: false
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+server:
+  port: 8080
+
+#Healthcheck actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, metrics
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+  health:
+    mongodb:
+      enabled: true
+
+  info:
+    env:
+      enabled: true
 
 
 jwt:
@@ -31,3 +53,4 @@ jwt:
 logging:
   pattern: # PARA EL CORRELATIONAL ID - LO MOSTRAMOS EN LOG
     console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] [%X{correlationId}] %-5level %logger - %msg%n"
+
