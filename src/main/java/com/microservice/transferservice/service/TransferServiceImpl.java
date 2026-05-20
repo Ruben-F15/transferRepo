@@ -27,12 +27,6 @@ public class TransferServiceImpl implements TransferService {
     private final TransferRepository transferRepository;
     private final TransferEventProducer transferEventProducer;
 
-    @Transactional
-    @Override
-    public boolean transferFunds(String sourceUserId, String destinationUserId, BigDecimal amount) {
-        return false;
-    }
-
     @Override
     public void createTransfer(CreateTransferRequestDTO request) {
 

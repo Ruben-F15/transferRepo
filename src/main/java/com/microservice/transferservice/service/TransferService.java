@@ -7,8 +7,5 @@ import java.math.BigDecimal;
 
 @Service
 public interface TransferService {
-
-    boolean transferFunds(String sourceUserId, String destinationUserId, BigDecimal amount);
-
     void createTransfer(CreateTransferRequestDTO request);
 }
