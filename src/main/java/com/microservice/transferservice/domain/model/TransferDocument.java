@@ -43,4 +43,9 @@ public class TransferDocument {
     private String failureReason;
 
     private String transactionId; // UUID
+
+    public void updateStatus(TransferStatus newStatus) {
+        this.setStatus(newStatus);
+        this.setStatusUpdatedAt(Instant.now());
+    }
 }

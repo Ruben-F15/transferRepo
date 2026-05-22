@@ -6,15 +6,11 @@ import com.microservice.transferservice.domain.model.TransferDocument;
 import com.microservice.transferservice.dto.CreateTransferRequestDTO;
 import com.microservice.transferservice.exception.EqualSourceAndDestinationUserIdException;
 import com.microservice.transferservice.exception.TransferNotFoundException;
-import com.microservice.transferservice.kafka.event.FundsReservationFailedEvent;
-import com.microservice.transferservice.kafka.event.FundsReservedEvent;
-import com.microservice.transferservice.kafka.event.TransferDebitRequestedEvent;
-import com.microservice.transferservice.kafka.event.TransferRequestedEvent;
+import com.microservice.transferservice.kafka.event.*;
 import com.microservice.transferservice.kafka.producer.TransferEventProducer;
 import com.microservice.transferservice.repository.TransferRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataAccessException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -76,50 +72,79 @@ public class TransferServiceImpl implements TransferService {
 
     @Override
     public void handleFundsReservedEvent(FundsReservedEvent fundsReservedEvent) {
-        try {
-            log.info(":::::::: buscando transferDocument desde handleFundsReservedEvent={}", fundsReservedEvent.transactionId());
-            TransferDocument transferDocument = transferRepository.findByTransactionIdAndStatus(fundsReservedEvent.transactionId(), TransferStatus.PENDING)
-                    .orElseThrow(() -> new TransferNotFoundException("Transfer not found for TransactionId:" + fundsReservedEvent.transactionId()));
-            log.info(":::::::: transferDocument encontrado={}", transferDocument.getTransactionId());
+        log.info(":::::::: buscando transferDocument desde handleFundsReservedEvent={}", fundsReservedEvent.transactionId());
+        TransferDocument transferDocument = transferRepository.findByTransactionIdAndStatus(fundsReservedEvent.transactionId(), TransferStatus.PENDING)
+                .orElseThrow(() -> new TransferNotFoundException("Transfer not found for TransactionId:" + fundsReservedEvent.transactionId()));
+        log.info(":::::::: transferDocument encontrado={}", transferDocument.getTransactionId());
 
-            transferDocument.setStatus(TransferStatus.FUNDS_RESERVED);
-            transferDocument.setStatusUpdatedAt(Instant.now());
+        transferDocument.updateStatus(TransferStatus.FUNDS_RESERVED);
 
-            transferRepository.save(transferDocument);
-            log.info(":::::::: transferDocument Actualizado y guardado");
+        transferRepository.save(transferDocument);
+        log.info("::::::::: transferDocument Actualizado y guardado como {}", TransferStatus.FUNDS_RESERVED);
 
-            TransferDebitRequestedEvent debitRequestedEvent = new TransferDebitRequestedEvent(
-                    transferDocument.getSourceUserId(),
-                    transferDocument.getAmount(),
-                    transferDocument.getTransactionId()
-            );
+        TransferDebitRequestedEvent debitRequestedEvent = new TransferDebitRequestedEvent(
+                transferDocument.getSourceUserId(),
+                transferDocument.getAmount(),
+                transferDocument.getTransactionId()
+        );
 
-            log.info(":::::::: enviamos debitRequestedEvent {}", debitRequestedEvent);
-            transferEventProducer.sendTransferDebitRequestEvent(debitRequestedEvent);
-            log.info(":::::::: enviado debitRequestedEvent");
-        } catch (DataAccessException ex) {
-            log.error("::::: exception en handleFundsReservedEvent{}", ex.getMessage());
-        }
+        log.info(":::::::: enviamos debitRequestedEvent {}", debitRequestedEvent);
+        transferEventProducer.sendTransferDebitRequestEvent(debitRequestedEvent);
+        log.info(":::::::: enviado debitRequestedEvent");
+
     }
 
     @Override
     public void handleFundsReservationFailedEvent(FundsReservationFailedEvent fundsReservationFailedEvent) {
-        try {
-            log.info(":::::::: buscando transferDocument desde handleFundsReservationFailedEvent={}", fundsReservationFailedEvent.transactionId());
-            TransferDocument transferDocument = transferRepository.findByTransactionId(fundsReservationFailedEvent.transactionId())
-                    .orElseThrow(() -> new TransferNotFoundException("Transfer not found for TransactionId:" + fundsReservationFailedEvent.transactionId()));
-            log.info(":::::::: transferDocument encontrado ={}", transferDocument.getTransactionId());
+        log.info(":::::::: buscando transferDocument desde handleFundsReservationFailedEvent={}", fundsReservationFailedEvent.transactionId());
+        TransferDocument transferDocument = transferRepository.findByTransactionId(fundsReservationFailedEvent.transactionId())
+                .orElseThrow(() -> new TransferNotFoundException("Transfer not found for TransactionId:" + fundsReservationFailedEvent.transactionId()));
+        log.info(":::::::: transferDocument encontrado ={}", transferDocument.getTransactionId());
 
-            transferDocument.setStatus(TransferStatus.FAILED);
-            transferDocument.setFailureReason(fundsReservationFailedEvent.failReason());
-            transferDocument.setStatusUpdatedAt(Instant.now());
-            transferRepository.save(transferDocument);
-            log.info(":::::::: transferDocument Actualizado y guardado como FAILED");
-            System.out.println("::::::::: TRANSFERENCIA FALLIDA ::::::::::::::");
-            System.out.println("::::::::: AQUI AÑADIRIAMOS ALGUNA LOGICA PARA COMUNICARLO AL USUARIO :::::::::");
+        transferDocument.updateStatus(TransferStatus.FAILED);
+        transferDocument.setFailureReason(fundsReservationFailedEvent.failReason());
 
-        } catch (DataAccessException ex) {
-            log.error("::::: exception en handleFundsReservationFailedEvent{}", ex.getMessage());
-        }
+        transferRepository.save(transferDocument);
+        log.info(":::::::: transferDocument Actualizado y guardado como {}", TransferStatus.FAILED);
+        System.out.println("::::::::: TRANSFERENCIA FALLIDA ::::::::::::::");
+        System.out.println("::::::::: AQUI AÑADIRIAMOS ALGUNA LOGICA PARA COMUNICARLO AL USUARIO :::::::::");
+    }
+
+    @Override
+    public void handleFundsDebitedEvent(FundsDebitedEvent fundsDebitedEvent) {
+        log.info(":::::::: buscando transferDocument desde handleFundsDebitedEvent={}", fundsDebitedEvent.transactionId());
+        TransferDocument transferDocument = transferRepository.findByTransactionId(fundsDebitedEvent.transactionId())
+                .orElseThrow(() -> new TransferNotFoundException("Transfer not found for TransactionId:" + fundsDebitedEvent.transactionId()));
+        log.info("::::::: transferDocument encontrado ={}", transferDocument.getTransactionId());
+
+        transferDocument.updateStatus(TransferStatus.DEBITED);
+
+        transferRepository.save(transferDocument);
+        log.info("::::::: transferDocument Actualizado y guardado como {}", TransferStatus.DEBITED);
+
+        TransferCreditRequestedEvent creditRequestedEvent = new TransferCreditRequestedEvent(
+                transferDocument.getSourceUserId(),
+                transferDocument.getDestinationUserId(),
+                transferDocument.getAmount(),
+                transferDocument.getTransactionId()
+        );
+
+        log.info(":::::::: enviamos creditRequestedEvent {}", creditRequestedEvent);
+        transferEventProducer.sendTransferCreditRequestEvent(creditRequestedEvent);
+        log.info(":::::::: enviado creditRequestedEvent");
+    }
+
+    @Override
+    public void handleFundsCreditedEvent(FundsCreditedEvent fundsCreditedEvent) {
+        log.info(":::::::: buscando transferDocument desde handleFundsCreditedEvent={}", fundsCreditedEvent.transactionId());
+        TransferDocument transferDocument = transferRepository.findByTransactionId(fundsCreditedEvent.transactionId())
+                .orElseThrow(() -> new TransferNotFoundException("Transfer not found for TransactionId:" + fundsCreditedEvent.transactionId()));
+        log.info(":::::::::: transferDocument encontrado ={}", transferDocument.getTransactionId());
+
+        transferDocument.updateStatus(TransferStatus.COMPLETED);
+
+        transferRepository.save(transferDocument);
+        log.info(":::::::::: transferDocument Actualizado y guardado como {}", TransferStatus.COMPLETED);
+        System.out.println(":::::::::::::::::::: COMPLETED ::::::::::::::::::::::::::");
     }
 }

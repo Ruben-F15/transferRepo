@@ -1,5 +1,7 @@
 package com.microservice.transferservice.kafka.consumer;
 
+import com.microservice.transferservice.kafka.event.FundsCreditedEvent;
+import com.microservice.transferservice.kafka.event.FundsDebitedEvent;
 import com.microservice.transferservice.kafka.event.FundsReservationFailedEvent;
 import com.microservice.transferservice.kafka.event.FundsReservedEvent;
 import com.microservice.transferservice.kafka.producer.TransferEventProducer;
@@ -33,7 +35,6 @@ public class AccountEventListener {
         } finally {
             MDC.clear();
         }
-
     }
 
     @KafkaListener(topics = "transfer.funds.reservation.failed")
@@ -50,7 +51,38 @@ public class AccountEventListener {
         } finally {
             MDC.clear();
         }
+    }
 
+    @KafkaListener(topics = "transfer.funds.debited")
+    public void handleTransferFundsDebitedEvent(FundsDebitedEvent fundsDebitedEvent, @Header(value = "correlationId", required = false ) String correlationId) {
+        try {
+            if (correlationId != null) {
+                MDC.put("correlationId", correlationId);
+            }
+
+            log.info("Received transfer funds debited event for transactionId={}", fundsDebitedEvent.transactionId());
+
+            transferService.handleFundsDebitedEvent(fundsDebitedEvent);
+
+        } finally {
+            MDC.clear();
+        }
+    }
+
+    @KafkaListener(topics = "transfer.funds.credited")
+    public void handleTransferFundsCreditedEvent(FundsCreditedEvent fundsCreditedEvent, @Header(value = "correlationId", required = false ) String correlationId) {
+        try {
+            if (correlationId != null) {
+                MDC.put("correlationId", correlationId);
+            }
+
+            log.info("Received transfer funds credited event for transactionId={}", fundsCreditedEvent.transactionId());
+
+            transferService.handleFundsCreditedEvent(fundsCreditedEvent);
+
+        } finally {
+            MDC.clear();
+        }
     }
 
 

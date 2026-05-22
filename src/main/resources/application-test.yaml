@@ -11,7 +11,9 @@ spring:
       auto-index-creation: true
 
   kafka:
-    enabled: false
+    bootstrap-servers: localhost:9092
+    listener:
+      auto-startup: false
 
 server:
   port: 8080

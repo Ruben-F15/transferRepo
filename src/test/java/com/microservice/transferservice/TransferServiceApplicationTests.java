@@ -1,5 +1,6 @@
 package com.microservice.transferservice;
 
+import com.microservice.transferservice.kafka.config.KafkaConsumerConfig;
 import com.microservice.transferservice.kafka.producer.TransferEventProducer;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
