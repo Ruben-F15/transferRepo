@@ -1,9 +1,6 @@
 package com.microservice.transferservice.kafka.consumer;
 
-import com.microservice.transferservice.kafka.event.FundsCreditedEvent;
-import com.microservice.transferservice.kafka.event.FundsDebitedEvent;
-import com.microservice.transferservice.kafka.event.FundsReservationFailedEvent;
-import com.microservice.transferservice.kafka.event.FundsReservedEvent;
+import com.microservice.transferservice.kafka.event.*;
 import com.microservice.transferservice.kafka.producer.TransferEventProducer;
 import com.microservice.transferservice.service.TransferService;
 import lombok.RequiredArgsConstructor;
@@ -69,6 +66,23 @@ public class AccountEventListener {
         }
     }
 
+    @KafkaListener(topics = "transfer.funds.debit.failed")
+    public void handleTransferFundsDebitFailed(FundsDebitFailedEvent fundsDebitFailedEvent, @Header(value = "correlationId", required = false ) String correlationId) {
+        try {
+            if (correlationId != null) {
+                MDC.put("correlationId", correlationId);
+            }
+
+            log.info("Received transfer funds debit failed event for transactionId={}", fundsDebitFailedEvent.transactionId());
+
+            transferService.handleFundsDebitFailedEvent(fundsDebitFailedEvent);
+
+        } finally {
+            MDC.clear();
+        }
+    }
+
+
     @KafkaListener(topics = "transfer.funds.credited")
     public void handleTransferFundsCreditedEvent(FundsCreditedEvent fundsCreditedEvent, @Header(value = "correlationId", required = false ) String correlationId) {
         try {
@@ -79,6 +93,22 @@ public class AccountEventListener {
             log.info("Received transfer funds credited event for transactionId={}", fundsCreditedEvent.transactionId());
 
             transferService.handleFundsCreditedEvent(fundsCreditedEvent);
+
+        } finally {
+            MDC.clear();
+        }
+    }
+
+    @KafkaListener(topics = "transfer.funds.credit.failed")
+    public void handleTransferFundsCreditFailed(FundsCreditFailedEvent fundsCreditFailedEvent, @Header(value = "correlationId", required = false ) String correlationId) {
+        try {
+            if (correlationId != null) {
+                MDC.put("correlationId", correlationId);
+            }
+
+            log.info("Received transfer funds debit failed event for transactionId={}", fundsCreditFailedEvent.transactionId());
+
+            transferService.handleFundsCreditFailedEvent(fundsCreditFailedEvent);
 
         } finally {
             MDC.clear();

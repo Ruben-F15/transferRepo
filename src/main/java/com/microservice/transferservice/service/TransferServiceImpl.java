@@ -147,4 +147,36 @@ public class TransferServiceImpl implements TransferService {
         log.info(":::::::::: transferDocument Actualizado y guardado como {}", TransferStatus.COMPLETED);
         System.out.println(":::::::::::::::::::: COMPLETED ::::::::::::::::::::::::::");
     }
+
+    @Override
+    public void handleFundsDebitFailedEvent(FundsDebitFailedEvent fundsDebitFailedEvent) {
+        log.info(":::::::: buscando transferDocument desde handleFundsDebitFailedEvent={}", fundsDebitFailedEvent.transactionId());
+        TransferDocument transferDocument = transferRepository.findByTransactionId(fundsDebitFailedEvent.transactionId())
+                .orElseThrow(() -> new TransferNotFoundException("Transfer not found for TransactionId:" + fundsDebitFailedEvent.transactionId()));
+        log.info(":::::::: transferDocument encontrado: ={}", transferDocument.getTransactionId());
+
+        transferDocument.updateStatus(TransferStatus.DEBIT_FAILED);
+        transferDocument.setFailureReason(fundsDebitFailedEvent.failReason());
+
+        transferRepository.save(transferDocument);
+        log.info(":::::::: transferDocument Actualizado y guardado como: {}", TransferStatus.DEBIT_FAILED);
+        System.out.println("::::::::: TRANSFERENCIA FALLIDA ::::::::::::::");
+        System.out.println("::::::::: AQUI AÑADIRIAMOS ALGUNA LOGICA PARA COMUNICARLO AL USUARIO :::::::::");
+    }
+
+    @Override
+    public void handleFundsCreditFailedEvent(FundsCreditFailedEvent fundsCreditFailedEvent) {
+        log.info(":::::::: buscando transferDocument desde handleFundsCreditFailedEvent={}", fundsCreditFailedEvent.transactionId());
+        TransferDocument transferDocument = transferRepository.findByTransactionId(fundsCreditFailedEvent.transactionId())
+                .orElseThrow(() -> new TransferNotFoundException("Transfer not found for TransactionId:" + fundsCreditFailedEvent.transactionId()));
+        log.info(":::::::: transferDocument encontrado : ={}", transferDocument.getTransactionId());
+
+        transferDocument.updateStatus(TransferStatus.CREDIT_FAILED);
+        transferDocument.setFailureReason(fundsCreditFailedEvent.failReason());
+
+        transferRepository.save(transferDocument);
+        log.info("::::::::: transferDocument Actualizado y guardado como: {}", TransferStatus.CREDIT_FAILED);
+        System.out.println("::::::::: TRANSFERENCIA FALLIDA ::::::::::::::");
+        System.out.println("::::::::: AQUI AÑADIRIAMOS ALGUNA LOGICA PARA COMUNICARLO AL USUARIO :::::::::");
+    }
 }

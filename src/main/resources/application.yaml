@@ -20,7 +20,9 @@ spring:
           funds-reserved-event:com.microservice.transferservice.kafka.event.FundsReservedEvent,
           funds-reservation-failed-event:com.microservice.transferservice.kafka.event.FundsReservationFailedEvent,
           funds-debited-event:com.microservice.transferservice.kafka.event.FundsDebitedEvent,
-          funds-credited-event:com.microservice.transferservice.kafka.event.FundsCreditedEvent
+          funds-debit-failed-event:com.microservice.transferservice.kafka.event.FundsDebitFailedEvent,
+          funds-credited-event:com.microservice.transferservice.kafka.event.FundsCreditedEvent,
+          funds-credit-failed-event:com.microservice.transferservice.kafka.event.FundsCreditFailedEvent
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
@@ -29,6 +31,7 @@ spring:
           transfer-requested-event:com.microservice.transferservice.kafka.event.TransferRequestedEvent,
           transfer-debit-requested-event:com.microservice.transferservice.kafka.event.TransferDebitRequestedEvent,
           transfer-credit-requested-event:com.microservice.transferservice.kafka.event.TransferCreditRequestedEvent
+
 
 server:
   port: 8080

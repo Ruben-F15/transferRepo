@@ -1,13 +1,8 @@
 package com.microservice.transferservice.service;
 
 import com.microservice.transferservice.dto.CreateTransferRequestDTO;
-import com.microservice.transferservice.kafka.event.FundsCreditedEvent;
-import com.microservice.transferservice.kafka.event.FundsDebitedEvent;
-import com.microservice.transferservice.kafka.event.FundsReservationFailedEvent;
-import com.microservice.transferservice.kafka.event.FundsReservedEvent;
+import com.microservice.transferservice.kafka.event.*;
 import org.springframework.stereotype.Service;
-
-import java.math.BigDecimal;
 
 @Service
 public interface TransferService {
@@ -20,4 +15,8 @@ public interface TransferService {
     void handleFundsDebitedEvent(FundsDebitedEvent fundsDebitedEvent);
 
     void handleFundsCreditedEvent(FundsCreditedEvent fundsCreditedEvent);
+
+    void handleFundsDebitFailedEvent(FundsDebitFailedEvent fundsDebitFailedEvent);
+
+    void handleFundsCreditFailedEvent(FundsCreditFailedEvent fundsCreditFailedEvent);
 }
