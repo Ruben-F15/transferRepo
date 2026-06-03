@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.math.BigDecimal;
 
 @RestController
-@RequestMapping("/api/v1/transacciones")
+@RequestMapping("/api/v1/transfers")
 @RequiredArgsConstructor
 public class TransferController {
 
