@@ -1,7 +1,6 @@
 package com.microservice.transferservice.kafka.consumer;
 
 import com.microservice.transferservice.kafka.event.*;
-import com.microservice.transferservice.kafka.producer.TransferEventProducer;
 import com.microservice.transferservice.service.TransferService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,7 +15,6 @@ import org.springframework.stereotype.Component;
 public class AccountEventListener {
 
     private final TransferService transferService;
-    private final TransferEventProducer transferEventProducer;
 
     @KafkaListener(topics = "transfer.funds.reserved")
     public void handleTransferFundsReserved(FundsReservedEvent fundsReservedEvent, @Header(value = "correlationId", required = false ) String correlationId) {
@@ -106,7 +104,7 @@ public class AccountEventListener {
                 MDC.put("correlationId", correlationId);
             }
 
-            log.info("Received transfer funds debit failed event for transactionId={}", fundsCreditFailedEvent.transactionId());
+            log.info("Received transfer funds debit failed event for transactionId = {}", fundsCreditFailedEvent.transactionId());
 
             transferService.handleFundsCreditFailedEvent(fundsCreditFailedEvent);
 
