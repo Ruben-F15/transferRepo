@@ -5,12 +5,14 @@ import com.microservice.transferservice.dto.TransferAcceptedResponseDTO;
 import com.microservice.transferservice.service.TransferService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/transfers")
 @RequiredArgsConstructor
@@ -27,6 +29,7 @@ public class TransferController {
      */
     @PostMapping("/transfer")
     public ResponseEntity<TransferAcceptedResponseDTO> iniciarTransferencia(@Valid @RequestBody CreateTransferRequestDTO request) {
+        log.info("ENTRAMOS EN LLAMADA A TRANSFERENCIA");
         transferService.createTransfer(request);
         // Respuesta Inmediata (Asíncrono).
         // No esperamos el resultado. Simplemente, confirmamos que la orden fue recibida y está en cola de procesamiento.

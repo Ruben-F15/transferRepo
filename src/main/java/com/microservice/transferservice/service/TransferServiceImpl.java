@@ -6,6 +6,7 @@ import com.microservice.transferservice.domain.model.TransferDocument;
 import com.microservice.transferservice.dto.CreateTransferRequestDTO;
 import com.microservice.transferservice.exception.EqualSourceAndDestinationUserIdException;
 import com.microservice.transferservice.exception.TransferNotFoundException;
+import com.microservice.transferservice.infrastructure.metrics.TransferMetrics;
 import com.microservice.transferservice.kafka.event.*;
 import com.microservice.transferservice.kafka.producer.TransferEventProducer;
 import com.microservice.transferservice.repository.TransferRepository;
@@ -25,6 +26,7 @@ public class TransferServiceImpl implements TransferService {
 
     private final TransferRepository transferRepository;
     private final TransferEventProducer transferEventProducer;
+    private final TransferMetrics transferMetrics;
 
     @Override
     public void createTransfer(CreateTransferRequestDTO request) {
@@ -50,6 +52,7 @@ public class TransferServiceImpl implements TransferService {
                 .build();
 
         transferRepository.save(transferDocument);
+        transferMetrics.incrementTransferCreatedCounter();
         log.info("::::::::::::::: transferDocument saved with transactionId={}", transferDocument.getTransactionId());
 
         log.info("::::::::::::::: sending event TransferRequestedEvent");
@@ -58,7 +61,6 @@ public class TransferServiceImpl implements TransferService {
                 .amount(transferDocument.getAmount())
                 .transactionId(transferDocument.getTransactionId())
                 .build();
-
         try {
             transferEventProducer.sendTransferRequestEvent(event);
             log.info("::::::::::::::: event TransferRequestedEvent sent!!");
@@ -105,6 +107,7 @@ public class TransferServiceImpl implements TransferService {
         transferDocument.setFailureReason(fundsReservationFailedEvent.failReason());
 
         transferRepository.save(transferDocument);
+        transferMetrics.incrementTransferFailedCounter();
         log.info(":::::::: transferDocument Actualizado y guardado como {}", TransferStatus.FAILED);
         System.out.println("::::::::: TRANSFERENCIA FALLIDA ::::::::::::::");
         System.out.println("::::::::: AQUI AÑADIRIAMOS ALGUNA LOGICA PARA COMUNICARLO AL USUARIO :::::::::");
@@ -146,6 +149,7 @@ public class TransferServiceImpl implements TransferService {
         transferRepository.save(transferDocument);
         log.info(":::::::::: transferDocument Actualizado y guardado como {}", TransferStatus.COMPLETED);
         System.out.println(":::::::::::::::::::: COMPLETED ::::::::::::::::::::::::::");
+        transferMetrics.incrementTransferCompletedCounter();
     }
 
     @Override
@@ -159,6 +163,7 @@ public class TransferServiceImpl implements TransferService {
         transferDocument.setFailureReason(fundsDebitFailedEvent.failReason());
 
         transferRepository.save(transferDocument);
+        transferMetrics.incrementTransferFailedCounter();
         log.info(":::::::: transferDocument Actualizado y guardado como: {}", TransferStatus.DEBIT_FAILED);
         System.out.println("::::::::: TRANSFERENCIA FALLIDA ::::::::::::::");
         System.out.println("::::::::: AQUI AÑADIRIAMOS ALGUNA LOGICA PARA COMUNICARLO AL USUARIO :::::::::");
@@ -175,6 +180,7 @@ public class TransferServiceImpl implements TransferService {
         transferDocument.setFailureReason(fundsCreditFailedEvent.failReason());
 
         transferRepository.save(transferDocument);
+        transferMetrics.incrementTransferFailedCounter();
         log.info("::::::::: transferDocument Actualizado y guardado como: {}", TransferStatus.CREDIT_FAILED);
         System.out.println("::::::::: TRANSFERENCIA FALLIDA ::::::::::::::");
         System.out.println("::::::::: AQUI AÑADIRIAMOS ALGUNA LOGICA PARA COMUNICARLO AL USUARIO :::::::::");
