@@ -10,6 +10,7 @@ import com.microservice.transferservice.infrastructure.metrics.TransferMetrics;
 import com.microservice.transferservice.kafka.event.*;
 import com.microservice.transferservice.kafka.producer.TransferEventProducer;
 import com.microservice.transferservice.repository.TransferRepository;
+import io.micrometer.core.instrument.Timer;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
@@ -30,6 +31,7 @@ public class TransferServiceImpl implements TransferService {
 
     @Override
     public void createTransfer(CreateTransferRequestDTO request) {
+
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         assert authentication != null;
@@ -53,6 +55,8 @@ public class TransferServiceImpl implements TransferService {
 
         transferRepository.save(transferDocument);
         transferMetrics.incrementTransferCreatedCounter();
+        Timer.Sample sample = transferMetrics.startTransferTimer();
+
         log.info("::::::::::::::: transferDocument saved with transactionId={}", transferDocument.getTransactionId());
 
         log.info("::::::::::::::: sending event TransferRequestedEvent");

@@ -11,4 +11,5 @@ public interface TransferRepository extends MongoRepository<TransferDocument, St
 
     Optional<TransferDocument> findByTransactionId(String transactionId);
     Optional<TransferDocument> findByTransactionIdAndStatus(String transactionId, TransferStatus transferStatus);
+    long countByStatus(TransferStatus status);
 }
