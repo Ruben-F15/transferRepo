@@ -11,6 +11,7 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.math.BigDecimal;
+import java.time.Duration;
 import java.time.Instant;
 
 @Getter
@@ -54,5 +55,9 @@ public class TransferDocument {
     public void updateStatus(TransferStatus newStatus) {
         this.setStatus(newStatus);
         this.setStatusUpdatedAt(Instant.now());
+    }
+
+    public Duration processingDuration() {
+        return Duration.between(this.getCreatedAt(), this.getStatusUpdatedAt());
     }
 }

@@ -17,6 +17,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -55,7 +56,6 @@ public class TransferServiceImpl implements TransferService {
 
         transferRepository.save(transferDocument);
         transferMetrics.incrementTransferCreatedCounter();
-        Timer.Sample sample = transferMetrics.startTransferTimer();
 
         log.info("::::::::::::::: transferDocument saved with transactionId={}", transferDocument.getTransactionId());
 
@@ -112,6 +112,7 @@ public class TransferServiceImpl implements TransferService {
 
         transferRepository.save(transferDocument);
         transferMetrics.incrementTransferFailedCounter();
+        transferMetrics.recordTransferDuration(transferDocument.processingDuration());
         log.info(":::::::: transferDocument Actualizado y guardado como {}", TransferStatus.FAILED);
         System.out.println("::::::::: TRANSFERENCIA FALLIDA ::::::::::::::");
         System.out.println("::::::::: AQUI AÑADIRIAMOS ALGUNA LOGICA PARA COMUNICARLO AL USUARIO :::::::::");
@@ -151,9 +152,10 @@ public class TransferServiceImpl implements TransferService {
         transferDocument.updateStatus(TransferStatus.COMPLETED);
 
         transferRepository.save(transferDocument);
+        transferMetrics.incrementTransferCompletedCounter();
+        transferMetrics.recordTransferDuration(transferDocument.processingDuration());
         log.info(":::::::::: transferDocument Actualizado y guardado como {}", TransferStatus.COMPLETED);
         System.out.println(":::::::::::::::::::: COMPLETED ::::::::::::::::::::::::::");
-        transferMetrics.incrementTransferCompletedCounter();
     }
 
     @Override
@@ -168,6 +170,7 @@ public class TransferServiceImpl implements TransferService {
 
         transferRepository.save(transferDocument);
         transferMetrics.incrementTransferFailedCounter();
+        transferMetrics.recordTransferDuration(transferDocument.processingDuration());
         log.info(":::::::: transferDocument Actualizado y guardado como: {}", TransferStatus.DEBIT_FAILED);
         System.out.println("::::::::: TRANSFERENCIA FALLIDA ::::::::::::::");
         System.out.println("::::::::: AQUI AÑADIRIAMOS ALGUNA LOGICA PARA COMUNICARLO AL USUARIO :::::::::");
@@ -185,6 +188,7 @@ public class TransferServiceImpl implements TransferService {
 
         transferRepository.save(transferDocument);
         transferMetrics.incrementTransferFailedCounter();
+        transferMetrics.recordTransferDuration(transferDocument.processingDuration());
         log.info("::::::::: transferDocument Actualizado y guardado como: {}", TransferStatus.CREDIT_FAILED);
         System.out.println("::::::::: TRANSFERENCIA FALLIDA ::::::::::::::");
         System.out.println("::::::::: AQUI AÑADIRIAMOS ALGUNA LOGICA PARA COMUNICARLO AL USUARIO :::::::::");

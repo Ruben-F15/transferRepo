@@ -6,9 +6,9 @@ import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
-import lombok.AllArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+
+import java.time.Duration;
 
 @Component
 public class TransferMetrics {
@@ -20,7 +20,7 @@ public class TransferMetrics {
     private final Timer transferProcessingTimer;
 
 
-    public TransferMetrics(TransferRepository transferRepository, MeterRegistry meterRegistry, Timer transferProcessingTimer) {
+    public TransferMetrics(TransferRepository transferRepository, MeterRegistry meterRegistry) {
         this.transferRepository = transferRepository;
 
         //metrica contador de transferencias creadas/solicitadas
@@ -44,6 +44,7 @@ public class TransferMetrics {
         //metrica timer para controlar el tiempo que tarda en completarse una transferencia
         this.transferProcessingTimer = Timer.builder("business.transfer.processing.time")
                 .description("Tiempo empleado en procesar una transferencia")
+                .publishPercentileHistogram()
                 .register(meterRegistry);
 
         //metrica de transferencias pendientes actuales
@@ -71,5 +72,9 @@ public class TransferMetrics {
 
     public void  incrementTransferFailedCounter() {
         transferFailedCounter.increment();
+    }
+
+    public void recordTransferDuration(Duration duration) {
+        transferProcessingTimer.record(duration);
     }
 }
