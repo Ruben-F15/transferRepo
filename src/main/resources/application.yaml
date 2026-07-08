@@ -3,7 +3,7 @@ spring:
     name: transferservice
 
   mongodb:
-    uri: ${SPRING_MONGODB_URI}
+    uri: mongodb://${MONGO_USER_TS}:${MONGO_PASS_TS}@${MONGO_HOSTS_TS}/${MONGO_DB_TS}?authSource=${MONGO_DB_TS}
 
 
   kafka:

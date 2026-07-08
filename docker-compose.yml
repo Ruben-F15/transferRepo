@@ -9,12 +9,12 @@ services:
     volumes:
       - transfer_mongo:/data/db
     environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASS}
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER_TS}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASS_TS}
     networks:
       - microservices-net
     healthcheck:
-      test: [ "CMD", "mongosh", "-u", "${MONGO_ROOT_USER}", "-p", "${MONGO_ROOT_PASS}", "--authenticationDatabase", "admin", "--eval", "db.adminCommand('ping').ok" ]
+      test: [ "CMD", "mongosh", "-u", "${MONGO_ROOT_USER_TS}", "-p", "${MONGO_ROOT_PASS_TS}", "--authenticationDatabase", "admin", "--eval", "db.adminCommand('ping').ok" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -31,11 +31,11 @@ services:
       - ./mongo-init:/scripts
     entrypoint: [ "bash", "/scripts/init.sh" ]
     environment:
-      MONGO_ROOT_USER: ${MONGO_ROOT_USER}
-      MONGO_ROOT_PASS: ${MONGO_ROOT_PASS}
-      APP_USER: ${MONGO_USER}
-      APP_PASS: ${MONGO_PASS}
-      MONGO_DB: ${MONGO_DB}
+      MONGO_ROOT_USER: ${MONGO_ROOT_USER_TS}
+      MONGO_ROOT_PASS: ${MONGO_ROOT_PASS_TS}
+      APP_USER: ${MONGO_USER_TS}
+      APP_PASS: ${MONGO_PASS_TS}
+      MONGO_DB: ${MONGO_DB_TS}
     networks:
       - microservices-net
 
@@ -52,7 +52,7 @@ services:
     ports:
       - "8082:8080"
     environment:
-      SPRING_MONGODB_URI: mongodb://${MONGO_USER}:${MONGO_PASS}@${MONGO_HOSTS}/${MONGO_DB}?authSource=${MONGO_DB}
+      SPRING_MONGODB_URI: mongodb://${MONGO_USER_TS}:${MONGO_PASS_TS}@${MONGO_HOSTS_TS}/${MONGO_DB_TS}?authSource=${MONGO_DB_TS}
       JWT_SECRET: ${SECRET_KEY}
     networks:
       - microservices-net
