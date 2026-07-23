@@ -455,23 +455,3 @@ Mientras que otros microservicios se centran en responsabilidades concretas, est
 La combinación del patrón Saga, la comunicación asíncrona mediante Kafka, la persistencia del estado de las operaciones, las compensaciones automáticas, la propagación del `Correlation ID` y las métricas de negocio convierten a este microservicio en el elemento central de la arquitectura distribuida desarrollada en este proyecto.
 
 Más allá de implementar una funcionalidad bancaria, Transfer Service demuestra cómo abordar problemas habituales en sistemas distribuidos modernos mediante patrones de diseño ampliamente utilizados en entornos profesionales.
-
-## Documentación general
-
-| Documento | Descripción |
-|-----------|-------------|
-| [README.md](README.md) | Visión general de la plataforma. |
-| [ARCHITECTURE.md](ARCHITECTURE.md) | Arquitectura, principios de diseño y decisiones técnicas. |
-| [EVENTS.md](EVENTS.md) | Comunicación mediante eventos, Kafka y patrón Saga. |
-| [SECURITY.md](SECURITY.md) | Autenticación, autorización y seguridad con JWT. |
-
-
-## Microservicios
-
-| Servicio | Documentación |
-|----------|---------------|
-| API Gateway | [APIGATEWAY](APIGATEWAY.md) |
-| User Authentication Service | [USERAUTHSERVICE](USERAUTHSERVICE.md) |
-| Account Service | [ACCOUNTSERVICE](ACCOUNTSERVICE.md) |
-| Transfer Service | [TRANSFERSERVICE](TRANSFERSERVICE.md) |
-| Infrastructure | [INFRASTRUCTURE](INFRASTRUCTURE.md) |
